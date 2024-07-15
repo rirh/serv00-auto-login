@@ -98,7 +98,7 @@ func main() {
 	}
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", false),
+		chromedp.Flag("headless", true),
 		chromedp.Flag("ignore-certificate-errors", true),
 		chromedp.NoSandbox,
 	)
