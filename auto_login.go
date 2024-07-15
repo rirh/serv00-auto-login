@@ -67,16 +67,6 @@ func sendTelegramMessage(message string) error {
 	payload := map[string]interface{}{
 		"chat_id": telegramChatID,
 		"text":    message,
-		"reply_markup": map[string]interface{}{
-			"inline_keyboard": [][]map[string]string{
-				{
-					{
-						"text": "问题反馈❓",
-						"url":  "https://t.me/yxjsjl",
-					},
-				},
-			},
-		},
 	}
 	payloadBytes, _ := json.Marshal(payload)
 
