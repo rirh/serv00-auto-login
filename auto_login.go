@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/chromedp/chromedp"
+	"github.com/chromedp/chromedp/launcher"
 )
 
 type Account struct {
@@ -87,7 +88,7 @@ func sendTelegramMessage(message string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		bodyBytes, _ := io.ReadAll(resp.Body)
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
 		return fmt.Errorf("发送消息到Telegram失败: %s", string(bodyBytes))
 	}
 
@@ -107,7 +108,9 @@ func main() {
 		log.Fatalf("解析 ACCOUNTS_JSON 环境变量时出错: %v", err)
 	}
 
-	ctx, cancel := chromedp.NewContext(context.Background())
+	browser := launcher.New().NoSandbox().Headless(true)
+	browser.Flag("ignore-certificate-errors", true)
+	ctx, cancel := chromedp.NewContext(context.Background(), chromedp.WithBrowserOption(browser))
 	defer cancel()
 
 	for _, account := range accounts {
