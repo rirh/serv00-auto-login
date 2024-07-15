@@ -97,14 +97,14 @@ func sendTelegramMessage(message string) error {
 func main() {
 	message = "serv00&ct8自动化脚本运行\n"
 
-	data, err := os.ReadFile("accounts.json")
-	if err != nil {
-		log.Fatalf("读取 accounts.json 文件时出错: %v", err)
+	accountsJSON := os.Getenv("ACCOUNTS_JSON")
+	if accountsJSON == "" {
+		log.Fatalf("环境变量 ACCOUNTS_JSON 为空")
 	}
 
 	var accounts []Account
-	if err := json.Unmarshal(data, &accounts); err != nil {
-		log.Fatalf("解析 accounts.json 文件时出错: %v", err)
+	if err := json.Unmarshal([]byte(accountsJSON), &accounts); err != nil {
+		log.Fatalf("解析 ACCOUNTS_JSON 环境变量时出错: %v", err)
 	}
 
 	ctx, cancel := chromedp.NewContext(context.Background())
