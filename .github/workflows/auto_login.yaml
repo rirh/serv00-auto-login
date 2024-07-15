@@ -26,9 +26,7 @@ jobs:
       run: go mod init serv00-auto-login
 
     - name: Get dependencies
-      run: |
-        go get github.com/chromedp/chromedp
-        go get github.com/chromedp/chromedp/launcher
+      run: go get github.com/chromedp/chromedp
 
     - name: Build Go application
       run: go build -o auto_login

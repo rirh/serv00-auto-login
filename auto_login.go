@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/chromedp/chromedp"
-	"github.com/chromedp/chromedp/launcher"
 )
 
 type Account struct {
@@ -108,9 +107,16 @@ func main() {
 		log.Fatalf("解析 ACCOUNTS_JSON 环境变量时出错: %v", err)
 	}
 
-	browser := launcher.New().NoSandbox().Headless(true)
-	browser.Flag("ignore-certificate-errors", true)
-	ctx, cancel := chromedp.NewContext(context.Background(), chromedp.WithBrowserOption(browser))
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("headless", true),
+		chromedp.Flag("ignore-certificate-errors", true),
+		chromedp.NoSandbox,
+	)
+
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancel()
+
+	ctx, cancel := chromedp.NewContext(allocCtx)
 	defer cancel()
 
 	for _, account := range accounts {
