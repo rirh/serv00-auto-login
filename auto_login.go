@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -77,7 +77,7 @@ func sendTelegramMessage(message string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		bodyBytes, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("发送消息到Telegram失败: %s", string(bodyBytes))
 	}
 
@@ -98,7 +98,7 @@ func main() {
 	}
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", true),
+		chromedp.Flag("headless", false),
 		chromedp.Flag("ignore-certificate-errors", true),
 		chromedp.NoSandbox,
 	)
@@ -114,7 +114,6 @@ func main() {
 		if !contains(account.Panel, "ct8") {
 			serviceName = "serv00"
 		}
-
 		isLoggedIn, err := login(ctx, account.Username, account.Password, account.Panel)
 		if err != nil {
 			message += fmt.Sprintf("%s账号 %s 登录失败，请检查%s账号和密码是否正确。\n", serviceName, account.Username, serviceName)
