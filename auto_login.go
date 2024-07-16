@@ -45,18 +45,38 @@ func login(ctx context.Context, username, password, panel string) (bool, error) 
 	var loggedIn bool
 	url := fmt.Sprintf("https://%s/login/?next=/", panel)
 	log.Printf("Navigating to URL: %s", url)
-
-	if err := chromedp.Run(ctx,
+	// 任务列表
+	tasks := chromedp.Tasks{
 		chromedp.Navigate(url),
-		chromedp.SendKeys(`#id_username`, username),
-		chromedp.SendKeys(`#id_password`, password),
-		chromedp.Click(`#submit`),
-		chromedp.WaitVisible(`a[href="/logout/"]`),
-		chromedp.Evaluate(`document.querySelector('a[href="/logout/"]') !== null`, &loggedIn),
-	); err != nil {
-		return false, fmt.Errorf("%s账号 %s 登录时出现错误: %v", serviceName, username, err)
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			log.Println("Navigated to the login page")
+			return nil
+		}),
+		chromedp.WaitVisible(`#id_username`, chromedp.ByID),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			log.Println("Username input is visible")
+			return nil
+		}),
+		chromedp.SendKeys(`#id_username`, username, chromedp.ByID),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			log.Println("Entered username")
+			return nil
+		}),
+		chromedp.SendKeys(`#id_password`, password, chromedp.ByID),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			log.Println("Entered password")
+			return nil
+		}),
+		chromedp.Click(`#submit`, chromedp.ByID),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			log.Println("Clicked the login button")
+			return nil
+		}),
 	}
 
+	if err := chromedp.Run(ctx, tasks); err != nil {
+		return false, fmt.Errorf("%s账号 %s 登录时出现错误: %v", serviceName, username, err)
+	}
 	log.Printf("Logged in status for %s: %v", username, loggedIn)
 	return loggedIn, nil
 }
@@ -97,7 +117,7 @@ func main() {
 	}
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", true),
+		chromedp.Flag("headless", false), // Run in non-headless mode for debugging
 		chromedp.Flag("ignore-certificate-errors", true),
 		chromedp.NoSandbox,
 	)
@@ -106,6 +126,9 @@ func main() {
 	defer cancel()
 
 	ctx, cancel := chromedp.NewContext(allocCtx)
+	defer cancel()
+	// 超时时间
+	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	for _, account := range accounts {
