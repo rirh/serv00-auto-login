@@ -42,7 +42,6 @@ func login(ctx context.Context, username, password, panel string) (bool, error) 
 		serviceName = "serv00"
 	}
 
-	var loggedIn bool
 	url := fmt.Sprintf("https://%s/login/?next=/", panel)
 	log.Printf("Navigating to URL: %s", url)
 	// 任务列表
@@ -77,8 +76,8 @@ func login(ctx context.Context, username, password, panel string) (bool, error) 
 	if err := chromedp.Run(ctx, tasks); err != nil {
 		return false, fmt.Errorf("%s账号 %s 登录时出现错误: %v", serviceName, username, err)
 	}
-	log.Printf("Logged in status for %s: %v", username, loggedIn)
-	return loggedIn, nil
+	log.Printf("Logged in status for %s: %v", username, true)
+	return true, nil
 }
 
 func sendTelegramMessage(message string) error {
@@ -117,7 +116,7 @@ func main() {
 	}
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", false), // Run in non-headless mode for debugging
+		chromedp.Flag("headless", true), // Run in non-headless mode for debugging
 		chromedp.Flag("ignore-certificate-errors", true),
 		chromedp.NoSandbox,
 	)
