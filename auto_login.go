@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -37,13 +38,14 @@ func delayTime(ms int) {
 
 func login(ctx context.Context, username, password, panel string) (bool, error) {
 	serviceName := "ct8"
-	if !contains(panel, "ct8") {
+	if !strings.Contains(panel, "ct8") {
 		serviceName = "serv00"
 	}
 
 	var loggedIn bool
-
 	url := fmt.Sprintf("https://%s/login/?next=/", panel)
+	log.Printf("Navigating to URL: %s", url)
+
 	if err := chromedp.Run(ctx,
 		chromedp.Navigate(url),
 		chromedp.SendKeys(`#id_username`, username),
@@ -55,11 +57,8 @@ func login(ctx context.Context, username, password, panel string) (bool, error) 
 		return false, fmt.Errorf("%s账号 %s 登录时出现错误: %v", serviceName, username, err)
 	}
 
+	log.Printf("Logged in status for %s: %v", username, loggedIn)
 	return loggedIn, nil
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && s[:len(substr)] == substr
 }
 
 func sendTelegramMessage(message string) error {
@@ -111,7 +110,7 @@ func main() {
 
 	for _, account := range accounts {
 		serviceName := "ct8"
-		if !contains(account.Panel, "ct8") {
+		if !strings.Contains(account.Panel, "ct8") {
 			serviceName = "serv00"
 		}
 		isLoggedIn, err := login(ctx, account.Username, account.Password, account.Panel)
