@@ -112,7 +112,7 @@ func main() {
 
 	var accounts []Account
 	if err := json.Unmarshal([]byte(accountsJSON), &accounts); err != nil {
-		log.Fatalf("解析 ACCOUNTS_JSON 环境变量时出错: %v", err)
+		log.Fatalf("解析 ACCOUNTS_JSON 环境变量出错: %v", err)
 	}
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
